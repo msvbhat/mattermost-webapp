@@ -25,6 +25,7 @@ import {
     removeReaction,
 } from 'mattermost-redux/actions/posts';
 import {Posts, Preferences as PreferencesRedux} from 'mattermost-redux/constants';
+import {haveIChannelPermission} from 'mattermost-redux/selectors/entities/roles';
 
 import {connectionErrorCount} from 'selectors/views/system';
 
@@ -64,6 +65,14 @@ function makeMapStateToProps() {
         const userIsOutOfOffice = getStatusForUserId(state, currentUserId) === UserStatuses.OUT_OF_OFFICE;
         const badConnection = connectionErrorCount(state) > 1;
         const isTimezoneEnabled = config.ExperimentalTimezone === 'true';
+        const canPost = haveIChannelPermission(
+            state,
+            {
+                channel: currentChannel.id,
+                team: currentChannel.team_id,
+                permission: Permissions.CREATE_POST,
+            }
+        );
 
         return {
             currentTeamId: getCurrentTeamId(state),
@@ -91,6 +100,7 @@ function makeMapStateToProps() {
             emojiMap: getEmojiMap(state),
             badConnection,
             isTimezoneEnabled,
+            canPost,
         };
     };
 }
